@@ -5,9 +5,9 @@ include('Net/SSH2.php');
 
 class Router
 {
-    public $host_value;
     public $ssh_connection = null;
-    public $server = array("ip"=>"192.168.1", "sshport"=>"22", "user"=>"root", "pw"=>"admin");
+    public $server = array("ip"=>"", "sshport"=>"22", "user"=>"root", "pw"=>"admin");
+    private $ip;
     public $channels = array(
             2412,
             2417,
@@ -23,9 +23,8 @@ class Router
         );
 
     function __construct($host_ip){
-
-        $this->host_value = $host_ip;
-
+        $this->server['ip'] = $host_ip;
+        $this->ip = $host_ip;
     }
 
     function connectToRouter(){                     
@@ -33,7 +32,7 @@ class Router
         if($this->ssh_connection !== null)
             return $this->ssh_connection;
 
-        $ip =  $this->server['ip'] . "." .  $this->host_value;
+        $ip =  $this->server['ip'];
 
         $this->ssh_connection = new Net_SSH2($ip);
         
@@ -50,10 +49,6 @@ class Router
 
     function getRouterConnection(){
         return  $this->ssh_connection;
-    }
-
-    function getHostValue(){
-        return  $this->host_value;
     }
 
     function changeChannel($channelValue){
@@ -87,12 +82,23 @@ class Router
         return  $this->channels;
     }
 
+    function changeSSID($newSSID){
+
+        $this->ssh_connection->exec('nvram set wl_ssid=' .$newSSID);
+        $this->ssh_connection->exec("nvram commit");
+        $this->ssh_connection->exec("reboot");
+    }
+
     function getRouterChannel(){
 
         $data = $this->ssh_connection->exec('nvram get ath0_channel');
 
         return  $data;
-    }    
+    }   
+
+    function getIP(){
+        return $this->ip;
+    } 
 
     function getSurveyResult(){
 

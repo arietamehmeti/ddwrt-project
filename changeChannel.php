@@ -1,16 +1,21 @@
 <?php
 
 	// include 'mainInformation.php';
-	include 'connectssh.php';
 
-	$channelValue = $_REQUEST["channelValue"];
-	$host_num = $_REQUEST["host_num"];
+if(isset($_POST['request']) && $_POST['request'] =="changeChannel"){
 	
-	$connection = new Router($host_num);
+	include 'Router.php';
 
-	$connection->connectToRouter();
+		$channelValue = $_POST["channel_value"];
+		$host_num = $_POST["router_ip"];
+		
+		$connection = new Router($host_num);
 
-	$connection->changeChannel($channelValue);
+		$connection->connectToRouter();
 
-	echo "true";
+		$connection->changeChannel($channelValue);
+
+		echo "true";
+
+	}	
 ?>

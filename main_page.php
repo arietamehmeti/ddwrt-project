@@ -28,19 +28,38 @@
 
 		<!-- <table id="survey_results"></table> -->
 
+	<div class="container">
+		<div class="head">
+			<ul class="nav nav-pills menu">
+			  <li role="presentation"><a class="wh first" href="index.php">Home</a></li>
+			  <li role="presentation"><a class="wh first" href="index.php">Edit</a></li>
+			</ul>
+		</div>
+	</div>
+
 <script type="text/javascript">
 
 	    function changeChannel(variable){
 	        alert(variable.id);
 	       
-	        var xhttp = new XMLHttpRequest();
+	        // var xhttp = new XMLHttpRequest();
 
-	        if(this.readyState == 4 && this.status == 200){
-	        	alert("value has been changed");
-	        }
+	        // if(this.readyState == 4 && this.status == 200){
+	        // 	alert("value has been changed");
+	        // }
 
-	        xhttp.open("GET", "changeChannel.php?channelValue=" + variable.value + "&host_num=" + variable.id , true);
-	        xhttp.send();
+	        // xhttp.open("GET", "changeChannel.php?channel_value=" + variable.value + "&host_ip=" + variable.ip , true);
+	        // xhttp.send();
+
+			$.ajax({
+				url: "changeChannel.php",
+			    type: "POST",
+			    async: true,
+			    data: {request: 'changeChannel', channel_value: variable.value, router_ip: variable.id},
+			    	    success: function (response) { 		
+			    	    	alert("the success of the change is " + response);		    	    	
+			    }
+			});	        
 	    }
 	
 </script>

@@ -1,8 +1,43 @@
 <?php 
 
 include 'Router.php';
-
+include 'mysql.php';
 //Gets the results from the routers and dixplayes them on the screen
+
+function getRouters($main_router_id){
+    global $conn;
+
+    // echo "them main router is" .$main_router_id;
+
+    $sql = "SELECT ip FROM router WHERE main_router_id = '$main_router_id'";
+
+    $query = mysqli_query($conn, $sql);
+
+    if($query)
+        {
+            return $query;
+        }
+    else
+        echo "Error" .mysqli_error($conn);
+
+}
+
+function selectMainRouter($ip, $main_router_id){
+    global $conn;
+
+    $sql = "SELECT id FROM router WHERE ip=$main_router_id";
+    $query = mysqli_query($conn, $sql);
+
+    if($query)
+        {
+            echo "2.  Rated success";
+        }
+    else
+        echo "Query error: " .mysqli_error($conn);
+
+}
+
+
 function showRouterInformation($connection){
 
     // $ssh = connectToRouter($host_num);
@@ -36,7 +71,7 @@ function showRouterInformation($connection){
         // echo "The channel is " . $data;
         // array_push($router_data, $data);
 
-        $id = $connection->getHostValue();
+        $id = $connection->getIP();
 
         echo "<td> <select id='" .$id ."' onChange='changeChannel(this)'>";
 
@@ -161,14 +196,13 @@ function showSiteSurvey($connection){
 
 
 // The code begins here !!
-ini_set("display_errors", 0); 
-$serverNum = htmlspecialchars($_POST["routers"]);
+// ini_set("display_errors", 0); 
 
-// echo "the server Number is" . $serverNum ."<br><br>";
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-// THe information of the server
-$channels = 
-        array(
+$channels = array(
             2412,
             2417,
             2422,
@@ -182,13 +216,36 @@ $channels =
             2462
         );
 
+$main_ip = "";
+$router_array = [];
+
+echo "The session is" .$_SESSION['main_ip_id'] ."<br>";
+
+if(isset($_SESSION['main_ip_id']) && !empty($_SESSION['main_ip_id'])) {
+
+    $router_row = getRouters($_SESSION['main_ip_id']);
+    var_dump($router_row);
+
+    while ($row = mysqli_fetch_assoc($router_row)) {
+        array_push($router_array, $row['ip']);      
+    }
+
+}
+
+if(isset($_SESSION['main_ip_id']) &&  !empty($_SESSION['main_ip_id'])) {
+
+    $main_ip_id = $_SESSION["main_ip_id"];
+}
+
 echo "<div class='container'>";
 
 $connections = [];
 
-for($i = 3; $i < $serverNum + 3; $i++){
+$router_array_length =count($router_array); 
 
-	$connection = new Router($i);
+for($i = 0; $i < $router_array_length; $i++){
+
+	$connection = new Router($router_array[$i]);
 	$connection->connectToRouter();
 
 	array_push($connections, $connection);
@@ -197,8 +254,8 @@ for($i = 3; $i < $serverNum + 3; $i++){
 
 }
 
-showSiteSurvey(3);
-
+// showSiteSurvey(3);
+//  NEEDS THE OBJECTT INSTEAD OF THE INTEGER OF THE HOST
 echo "</div>";	
 
  ?>

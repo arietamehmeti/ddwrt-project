@@ -22,7 +22,6 @@
     session_start();
 	}
 
-
 	// define variables and set to empty values
 	  // require('header.php');
 	$result = true;
@@ -153,3 +152,4 @@
 
 	</body>
 </html>
+

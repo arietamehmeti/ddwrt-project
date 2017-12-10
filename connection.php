@@ -9,7 +9,7 @@ function getRouters($main_router_id){
 
     // echo "them main router is" .$main_router_id;
 
-    $sql = "SELECT ip FROM router WHERE main_router_id = '$main_router_id'";
+    $sql = "SELECT id,ip FROM router WHERE main_router_id = '$main_router_id'";
 
     $query = mysqli_query($conn, $sql);
 
@@ -37,6 +37,136 @@ function selectMainRouter($ip, $main_router_id){
 
 }
 
+function changeChannelTable(){
+
+        global $channels;
+        global $router_array;
+
+        
+        echo "<table class='table'>";
+            echo "<tr>";
+                echo "<th>Router</th>";
+                echo "<th>Channel/Frequency</th>";          
+            echo "</tr>";
+
+        // Cycle through the array
+
+            echo "<tr>";
+
+                createRouterOptions("channel");
+
+                echo "<td> <select id='channel_select'>";
+
+                    $array = $channels;
+                    $i=0;
+                    foreach($array as &$value){
+                            echo "<option class='channel_option' value= '". $i ."'> ".($i+1) ." - " .$value ."</option>";
+                            $i++;
+                    }
+
+                echo "</select > </td>";
+
+            echo "</tr>";
+
+        // Close the table
+        echo "</table>";
+
+        echo "<button onclick='changeChannel()' class='btn'>Submit Changes</button>";
+
+        echo "<br> <br>";
+}
+
+
+function createSSIDTable(){
+
+        global $channels;
+        global $router_array;
+
+        
+        echo "<table class='table'>";
+            echo "<tr>";
+                echo "<th>Router</th>";
+                echo "<th>SSID</th>";        
+            echo "</tr>";
+
+            echo "<tr>";
+
+                createRouterOptions("ssid");
+
+                echo "<td>";
+                    echo "<input id='input_ssid' max='32' type='text'></input>";
+                echo "</td>";
+
+            echo "</tr>";
+
+        // Close the table
+        echo "</table>";
+
+        echo "<button onclick='changeSSID()' class='btn'>Submit Changes</button>";
+
+        echo "<br> <br>";
+}
+
+function createRouterOptions($idName){
+
+    global $router_array;
+
+        echo "<td> <select id='router_select_".$idName ."''>";
+
+            $array = $router_array;
+            
+            echo "<option class='".$idName ."' value='-1' selected> All </option>";
+            
+            $i = 0;
+            
+            foreach($array as $key=>$value){   
+                    echo "<option class='".$idName ."' value= '".$key ."'> ".($i+1) ." - " .$value ."</option>";
+                    $i++;
+            }
+
+        echo "</select > </td>";
+
+}
+function createTXPWRTable(){
+
+        global $channels;
+        global $router_array;
+
+        echo "<table class='table'>";
+            echo "<tr>";
+                echo "<th>Router</th>";
+                echo "<th>TX Power</th>";        
+            echo "</tr>";
+
+            echo "<tr>";
+
+                createRouterOptions("tx_power");
+
+                echo "<td>";
+                    echo "<input id='input_txpwr' max='32' type='text'></input>";
+                echo "</td>";
+
+            echo "<tr>";                
+
+        echo "</table>";
+
+        echo "<button onclick='changeTXPower()' class='btn'>Submit Changes</button>";
+
+        echo "<br> <br>";
+}
+
+
+function createSelectOptions($array){
+    echo "<td> <select>";
+
+        for($i=0; $i < $channelSize; $i++){
+                echo "<option class='channels' value= '".$array[$i] ."'> ".($i+1) ." - " .$array[$i] ."</option>";
+        }
+
+    echo "</select > </td>";
+        
+}
+
 
 function showRouterInformation($connection){
 
@@ -45,48 +175,30 @@ function showRouterInformation($connection){
 
     // Gets the survey_results and formats it to JSON
 
-     $router_data = $connection->getBasicInformation();
+    $id = $connection->getID();
+
+    $router_data = $connection->getBasicInformation();
 
         // Open the table
-        echo "<table class='table'>";
-        echo "<tr>";
-            echo "<th>WAN IP address</th>";
-            echo "<th>LAN IP address</th>";
-            echo "<th>wl0_ssid</th>";
-            echo "<th>ath1_channelbw</th>";
-			echo "<th>ath0_channel</th>";
+        echo "<table class='table' id='$id'>";
+            echo "<tr>";
 
-        echo "</tr>";
+            foreach($router_data as $key=>$value)
+                echo "<th>$key</th>";       
 
-        // Cycle through the array
-        echo "<tr>";
+            echo "</tr>";
 
-        foreach ($router_data as $router_info) {
-            // Output a row
-  
-            echo "<td>$router_info</td>";         
-        }   
+            // Cycle through the array
+            echo "<tr>";
+            
 
-        $data = $connection->getRouterChannel();
-        // echo "The channel is " . $data;
-        // array_push($router_data, $data);
+                foreach ($router_data as $router_info) {
+                    // Output a row
+          
+                    echo "<td>$router_info</td>";         
+                }   
 
-        $id = $connection->getIP();
-
-        echo "<td> <select id='" .$id ."' onChange='changeChannel(this)'>";
-
-        $channelSize = count($channels);
-
-        for($i=0; $i < $channelSize; $i++){
-            if($channels[$i] != $data)
-                echo "<option class='channels' value= '".$channels[$i] ."'> ".($i+1) ." - " .$channels[$i] ."</option>";
-            else
-                echo "<option class='channels' value= '".$channels[$i] ."' selected > ".($i+1) ." - " .$channels[$i] ."</option>";
-        }
-
-        echo "</select > </td>";
-
-        echo "</tr>";
+            echo "</tr>";
         // Close the table
         echo "</table>";
     
@@ -98,12 +210,11 @@ function showRouterInformation($connection){
 
 function showSiteSurvey($connection){
 
-    // $ssh = connectToRouter($host_num);
+    $id = $connection -> getId();
 
-    $ssh = $connection -> getRouterConnection();
+    $survey_result = $connection->getSurveyResult();
 
-    // $survey_result = $ssh->exec('site_survey');
-    $survey_results = $connection->getSurveyResult();
+    // echo "The resultts is " .$survey_result;
 
     $results_parsed = preg_replace("#\[ [0-9]+\]# ", "} {", $survey_result);
 
@@ -118,7 +229,6 @@ function showSiteSurvey($connection){
 
     while( strlen($results_parsed) > 0 ){
 
-
         $temp = substr($results_parsed, $initialPos, $position = strpos($results_parsed,"}") + 1);
         // echo $temp ."<br>" .strlen($results_parsed) . "<br>";
 
@@ -129,7 +239,7 @@ function showSiteSurvey($connection){
         $temp = preg_replace("#\[#", ":\"", $temp); 
         $temp =preg_replace("#\]#", "\",", $temp);  
 
-        $temp =preg_replace("# SSID#","\"SSID\"", $temp);
+        $temp =preg_replace("#\bSSID#","\"SSID\"", $temp);
         $temp =preg_replace("#BSSID#","\"BSSID\"", $temp);
         $temp =preg_replace("#channel#","\"channel\"", $temp);
         $temp =preg_replace("#frequency#","\"frequency\"", $temp);
@@ -146,14 +256,13 @@ function showSiteSurvey($connection){
 
         $temp.= "}";
 
-         $temp = json_decode($temp);    
+        $temp = json_decode($temp);    
 
         array_push($results_array, $temp );     
 
          // echo json_encode($temp) ."<br>";
 
     }
-
 
     // Open the table
 
@@ -178,15 +287,15 @@ function showSiteSurvey($connection){
 
         // Output a row
         echo "<tr>";
-        echo "<td>$survey_data->SSID</td>";
-        echo "<td>$survey_data->channel</td>";
-        echo "<td>$survey_data->frequency</td>";
-        echo "<td>$survey_data->rssi</td>";
-        echo "<td>$survey_data->noise</td>";
-        echo "<td>$survey_data->beacon</td>";
-        echo "<td>$survey_data->dtim</td>";
-        echo "<td>$survey_data->rate</td>";
-        echo "<td>$survey_data->enc</td>";
+        echo "<td>" .@$survey_data->SSID ."</td>";
+        echo "<td>" .@$survey_data->channel."</td>";
+        echo "<td>" .@$survey_data->frequency."</td>";
+        echo "<td>" .@$survey_data->rssi."</td>";
+        echo "<td>" .@$survey_data->noise."</td>";
+        echo "<td>" .@$survey_data->beacon."</td>";
+        echo "<td>" .@$survey_data->dtim."</td>";
+        echo "<td>" .@$survey_data->rate."</td>";
+        echo "<td>" .@$survey_data->enc."</td>";
         echo "</tr>";
     }
 
@@ -219,17 +328,16 @@ $channels = array(
 $main_ip = "";
 $router_array = [];
 
-echo "The session is" .$_SESSION['main_ip_id'] ."<br>";
-
 if(isset($_SESSION['main_ip_id']) && !empty($_SESSION['main_ip_id'])) {
 
+    $main_ip = $_SESSION['main_ip'];
+
     $router_row = getRouters($_SESSION['main_ip_id']);
-    var_dump($router_row);
 
     while ($row = mysqli_fetch_assoc($router_row)) {
-        array_push($router_array, $row['ip']);      
-    }
 
+        $router_array[$row['id']] = $row['ip'];
+    }
 }
 
 if(isset($_SESSION['main_ip_id']) &&  !empty($_SESSION['main_ip_id'])) {
@@ -239,23 +347,31 @@ if(isset($_SESSION['main_ip_id']) &&  !empty($_SESSION['main_ip_id'])) {
 
 echo "<div class='container'>";
 
-$connections = [];
+$connections = array();
+
+changeChannelTable();
+createSSIDTable();
+createTXPWRTable();
 
 $router_array_length =count($router_array); 
 
-for($i = 0; $i < $router_array_length; $i++){
+foreach ($router_array as $key=>$router_ip) {
 
-	$connection = new Router($router_array[$i]);
-	$connection->connectToRouter();
+    $connection = new Router($key,$router_ip);
+    $connection->connectToRouter();
+    // echo " the ip is " .$router_ip;
 
-	array_push($connections, $connection);
-
-    showRouterInformation($connection);
-
+    if($connection !== false){
+        $connections[$key]= $connection;
+        showRouterInformation($connection);
+    }
 }
 
-// showSiteSurvey(3);
+showSiteSurvey($connections[12]);
+
+echo "The connected devices are" .$connections[12]->getConnectedDevices();
+
 //  NEEDS THE OBJECTT INSTEAD OF THE INTEGER OF THE HOST
-echo "</div>";	
+echo "</div>";
 
  ?>

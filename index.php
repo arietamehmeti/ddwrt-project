@@ -5,10 +5,12 @@
 	<head>
 		<title> Welcome to RouteVille</title>
 
-	  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">	  
-	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>	
-	  <script src="jquery-3.2.1.min.js"></script>
+	    <!-- Required meta tags -->
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	    <!-- Bootstrap CSS -->
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 
 	</head>
 
@@ -58,34 +60,37 @@
 
 	?>
 
-			<div class="signupbox mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+	<div class="container">
+
+		<div class="signupbox mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
 			    <div class="panel-heading">
-			      <div class="panel-title">Register Router</div>
+			      <div class="panel-title"></div>
 			    </div>
 			    <div class="panel-body">
-
+			    	
 			      <form class="form-horizontal" method="post" action="">
 
-	          <div class="form-group">
-			               <label for="main_ip" class="col-md-3 control-label">Main Router IP Address</label>
-			                <div class="col-md-9">
-			                  <input type="text" pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" class="form-control" id="main_ip" placeholder="Default Gateway IP Address" max="15" name="routers" min="1" required>
-			                    <!-- <span class="error">*<?php echo $gateway_ip_error;?></span> -->
-			                </div>
-			          </div>
+		          <div class="form-group">
+		               	<label for="main_ip" class="col-md-3 control-label">Main Router IP Address</label>
+		                <div class="col-md-9">
+					                  <input type="text" pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" class="form-control" id="main_ip" placeholder="Default Gateway IP Address" max="15" name="routers" min="1" required>
+					                    <!-- <span class="error">*<?php echo $gateway_ip_error;?></span> -->
+					                </div>
+					          </div>
 
-			          <div id="ip_addresses">
-			          	
+					          <div id="ip_addresses">						          	
 
-			          </div>
+					          </div>
 
-			          <!-- <span class="error">* required field.</span> -->
-			          <button class="btn btn-secondary" onclick="addIPField()">Add another IP</button>   
-			         <input class="btn btn-primary" type="buttton" onclick="submitRouterInfo()" name="submit" value="register">				          
-			      </form>
+					          <!-- <span class="error">* required field.</span> -->
+					          <button class="btn btn-secondary" onclick="addIPField()">Add another IP</button>   
+					         <input class="btn btn-primary" type="button" onclick="submitRouterInfo()" name="submit" value="register">				          
+					      </form>
 
-			  </div>
-			</div>		
+					  </div>
+			</div>	
+
+	</div>
 
 		<script>
 
@@ -100,7 +105,7 @@
 				});
 
 				$.ajax({
-					url: "submit_main_router_info.php",
+					url: "queries.php",
 				    type: "POST",
 				    async: true,
 				    data: {request: 'submitRouterInfo', main_ip: main_ip, router_ips: router_ips},
@@ -148,7 +153,11 @@
 				
 			}								
 
-		</script>				
+		</script>
+
+		<?php
+		 include("resources.php");
+		?>	
 
 	</body>
 </html>

@@ -345,7 +345,6 @@ if(isset($_SESSION['main_ip_id']) &&  !empty($_SESSION['main_ip_id'])) {
     $main_ip_id = $_SESSION["main_ip_id"];
 }
 
-echo "<div class='container'>";
 
 $connections = array();
 
@@ -367,11 +366,10 @@ foreach ($router_array as $key=>$router_ip) {
     }
 }
 
-showSiteSurvey($connections[12]);
+// showSiteSurvey($connections[12]);
 
-echo "The connected devices are" .$connections[12]->getConnectedDevices();
+// echo "The connected devices are" .$connections[12]->getConnectedDevices();
 
 //  NEEDS THE OBJECTT INSTEAD OF THE INTEGER OF THE HOST
-echo "</div>";
 
  ?>

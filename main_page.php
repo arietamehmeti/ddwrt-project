@@ -1,28 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
+	
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<title></title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 </head>
 <body>
-
 	<div class="container">
-		<div class="head">
-			<ul class="nav nav-pills menu">
-			  <li role="presentation"><a class="wh first" href="index.php">Home</a></li>
-			  <li role="presentation"><a class="wh first" href="index.php">Edit</a></li>
-			</ul>
-		</div>
+
+		<?php
+			include("resources.php"); 
+			include("navigation_bar.php");
+			include("connection.php");
+		?>
+
+		<script>
+			
+			setNavigationPage("home", "main_page.php");
+			setNavigationPage("edit", "edit/edit.php");
+			setActive("home");
+		</script>
+
 	</div>
 
-	<?php
-		include("connection.php")
-		?>  
-
-	<script type="text/javascript">
+	<script>
 
 			function createRequestData(request_str, change_value){
 
@@ -58,7 +63,7 @@
 			        }
 
 				$.ajax({
-					url: "router_changes.php",
+					url: "router_requests.php",
 				    type: "POST",
 				    async: true,
 				    data: data,
@@ -100,7 +105,7 @@
 
 			function changeInformation(){
 				$.ajax({
-					url: "router_changes.php",
+					url: "router_request.php",
 				    type: "POST",
 				    async: true,
 				    data: {request: 'changeTXPower', txpwr_value: txpwr_value, router_ip: router_ip, router_id: router_id},
@@ -155,16 +160,16 @@
 	        		
 	        	}
 
-	        });		        
-
-
+	        });
 
 	        var all_value = -1;
 	        var channels = <?php echo json_encode($channels); ?>;
 	        var router_array = <?php echo json_encode($router_array); ?>;
 	        var connections = <?php echo json_encode($connections); ?>;
-		
-	</script>
 
+	        var routers = {"main_router": main_routers_array, "router": routers_array};
+
+		
+	</script>	
 </body>
 </html>

@@ -1,17 +1,19 @@
 <?php
 
 include('Net/SSH2.php');
-// include("mainInformation.php");
 
 class Router implements JsonSerializable
 {
     public $ssh_connection = null;
-    public $server = array("ip"=>"", "sshport"=>"22", "user"=>"root", "pw"=>"admin");
+    public $server = array("sshport"=>"22", "user"=>"root", "password"=>"admin");
     public $ip;
     public $id;
+    public $wan= 0;
     public $ssid =0;
     public $channel = 0;
     public $tx_power=-1;
+    public $channel_bw=-1;
+    public $connected_users = [];
     public $channels = array(
             2412,
             2417,
@@ -28,7 +30,6 @@ class Router implements JsonSerializable
 
     function __construct($db_id,$host_ip){
         $this->id = $db_id;        
-        $this->server['ip'] = $host_ip;
         $this->ip = $host_ip;
     }
 
@@ -47,11 +48,14 @@ class Router implements JsonSerializable
 
     public function jsonSerialize() {
         return array(
+            'wan' => $this->wan,
             'ip'=>$this->ip,
-            'id'=>$this->id,
             'ssid'=>$this->ssid,
+            'channel_bw'=> $this->channel_bw,
             'channel'=>$this->channel,
-            'txpwr'=>$this->tx_power
+            'tx_power'=>$this->tx_power,
+            'connected_users'=>$this->connected_users
+            // 'id'=>$this->id,          
         );
     }
 
@@ -62,21 +66,21 @@ class Router implements JsonSerializable
             if($this->ssh_connection !== null)
                 return $this->ssh_connection;
 
-            $ip =  $this->server['ip'];
+            $ip =  $this->ip;
 
             $this->ssh_connection = new Net_SSH2($ip);
 
-            if (!$this->ssh_connection->login( "root", "admin")) {
+            if(!$this->ssh_connection->login($this->server["user"],$this->server["password"])){
                 // exit('Login Failed');
                 return false;         
-            }
-
-            return  $this->ssh_connection;            
+            }        
 
         }
         catch(Exception $e){
             echo 'Caught exception: ',  $e->getMessage(), "\n";
         }
+
+        return  $this->ssh_connection;            
 
     }
 
@@ -91,7 +95,12 @@ class Router implements JsonSerializable
     }
 
     function getWANIp(){
-        return $this->ssh_connection->exec('nvram get wan_ipaddr');
+
+        if($this->wan !== 0)
+            return $this->wan;
+
+        $this->wan = $this->ssh_connection->exec('nvram get wan_ipaddr');
+        return $this->wan;
     }
 
     function getChannels(){
@@ -110,6 +119,10 @@ class Router implements JsonSerializable
     }
 
     function getChannelBW($channel_name){
+
+        if($this->channel_bw != -1)
+            return $this->channel_bw;
+
         return $this->ssh_connection->exec('nvram get ' .$channel_name .'_channelbw');
     }    
 
@@ -123,9 +136,24 @@ class Router implements JsonSerializable
         return  $this->tx_power;
     }
 
-    function getConnectedDevices(){
-        return  $this->ssh_connection->exec("cat /proc/net/arp");
-    }  
+    function getConnectedUsers(){
+
+        // if($this->connected_users !== false)
+        //     return $this->connected_users;
+
+        $connected_users_str = $this->ssh_connection->exec("cat /proc/net/arp");
+
+        preg_match_all("/([0-9]{1,3}\.){3}[0-9]{1,3}/",$connected_users_str, $out);
+
+        $out = $out[0]; // Takes only the values that match the IP regex, instead of the string that sorrounded them as well.
+
+        if(is_array($out) && sizeof($out) !== 0){
+
+            $this->connected_users = $out;
+        }
+
+        return  $this->connected_users;
+    }
 
     function setSSID($newSSID){
 
@@ -172,7 +200,7 @@ class Router implements JsonSerializable
 
         $router_data["WAN IP"] = $this->getWANIp();
 
-         $router_data["LAN IP"] =  $this->getLANIp();
+        $router_data["LAN IP"] =  $this->getLANIp();
 
         $router_data["SSID"]  = $this->getSSID();
 

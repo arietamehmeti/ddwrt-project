@@ -30,25 +30,41 @@
 
 <script>
 
-	 function insertRouter(router_type){			
+	 function insert_router(router_type){			
 
-		router_id = $("#change_form").attr("name");
+		router_id = $("#"+ getCurrentEventName()). attr("name");
 		router_request = "insert";
 
-		parseRequestData(router_type, router_id, router_request);
-		
+		parseRequestData(router_type, router_request);
 	}
 
-	 function editRouter(router_type){			
+	 function update_router(router_type){			
 
-		router_id = $("#change_form").attr("name");
+		router_id = $("#"+ getCurrentEventName()).attr("name");
 		router_request = "update";
 
-		var data = parseRequestData(router_type, router_id, router_request);
+		var data = parseRequestData(router_type, router_request);
 		
 	}
 
-	function parseRequestData(router_type, router_id, router_request){
+	 function insert_main_router(router_type){			
+
+		router_id = $("#"+ getCurrentEventName()).attr("name");
+		router_request = "insert";
+
+		parseRequestData(router_type,router_request);
+	}
+
+	 function update_main_router(router_type){			
+
+		router_id = $("#"+ getCurrentEventName()).attr("name");
+		router_request = "update";
+
+		var data = parseRequestData(router_type, router_request);
+		
+	}	
+
+	function parseRequestData(router_type, router_request){
 
 		data = {};
 		var us = "_";
@@ -59,19 +75,12 @@
 
 		data.request = request_str;		
 
-		ip= $("#ip_router").val();		
+		ip= $("#ip_router").val();	
 
 		data.ip = ip;
-		data.id = router_id;
-		alert("the id is" + data.id);
+		data.id = $(".form-change").attr("name");
 
 		var router_to_traverse = routers.router_type;
-
-		router_info = main_routers_array.forEach(function(element){
-				if(element.id == router_id){
-					return element;
-				}
-			});
 
 			switch (router_type){
 			    case "main_router":
@@ -81,21 +90,24 @@
 			        data.main_router_id = $("#router_main_select").val();
 			        break;
 			}
-
+			
 			$.ajax({
 				url: "../queries.php",
 			    type: "POST",
-			    async: true,
+			    async: false,
 			    data: data,
 			    	    success: function (response) { 	
+			    	    	console.log("response" + response);
+			    	    	location.reload(true);
 
-			    	    	alert(response);
-			    	    	location.reload();
-					}	    	
-			    });	
+					},
+				error: function (response) {
+			    	    console.log(response);
+			    	    location.reload();	    	    
+			    }
+			    });		
 
 	}
-
 	function checkRouters(elem, table_name){
 		var id = $(elem).attr("id");
 	
@@ -127,8 +139,14 @@
 		    data: {request: 'deleteRouter', router_id_array: router_id_array, router_type: router_type},
 		    	    success: function (response) {
 		    	    
+		    	    console.log(response);
 		    	    location.reload();		    	    
-		    }
+		    },
+			error: function (response) {
+		    	    
+		    	    console.log(response);
+		    	    location.reload();		    	    
+		    }		    
 		});	
 	}
 	
@@ -140,100 +158,34 @@
 		});
 	}
 
-	function edit_main_router(element){
-
-		change_button_attr("edit", "main_router");
-
-		$("#ip_router").val($(element).data('ip'));
-
-		var router_info = getRouterById($(element).data('id'));
-
-		addInUseToModal(router_info.in_use);
-
-		$( "#change_form" ).on( "submit", function() {
-		  	editRouter("main_router");
-		  	// resetModalData();
-		});			
-
-		$( "#change_form" ).prop("name", $(element).data('id'));
-	}
-
-	function edit_router(element){
-
-		change_button_attr("edit", "router");
-
-		$("#ip_router").val($(element).data('ip'));
-
-		var router_info = getRouterById($(element).data('id'));
-
-		addOptionsToModal(router_info.main_router_id);
-
-		$( "#change_form" ).on( "submit", function() {
-		  	editRouter("router");
-		  	// resetModalData();
-		});
-
-		$("#change_form").prop("name",  $(element).data('id'));
-	}
-
-	function add_main_router(element){
-
-		change_button_attr("add", "main_router");
-
-		var router_info = getRouterById($(element).data('id'));	
-
-		addInUseToModal(router_info.in_use);
-
-		$( "#change_form" ).on( "submit", function() {
-		  	insertRouter("main_router");
-		  	// resetModalData();
-		});
-	}
-
-	function add_router(){
-
-		change_button_attr("add", "router");
-		addOptionsToModal();
-
-		$( "#change_form" ).on( "submit", function() {
-		  	insertRouter("router");
-		  	// resetModalData();
-		});		
-	}
-
 	function getRouterById(router_id){
 
 		var result = "";
 
 		main_routers_array.forEach(function(element){
-			if(element.id== router_id)
+			if(element.id== router_id){
 				result = element;
+
+				return result;
+			}
 		});	
 
-
 		routers_array.forEach(function(element){
-			if(element.id== router_id)
+			if(element.id== router_id){
+
 				result =  element;
+
+				return result;
+			}
 		});
 
-		return result;
+		return false;
 	}
 
-	function change_button_attr(btn_value, table_name){
-
-		resetModalData();
-
-		// $("#change_form").prop("onsubmit", btn_value + "Router('"+ table_name + "')");
-
-		btn_value = btn_value.toLowerCase().replace(/\b[a-z]/g, function(letter) {
-		    return letter.toUpperCase();
-		});
-
-		$("#change_btn").html(btn_value);
-	}
 
 	var main_routers_array = <?php echo json_encode(next($main_routers)); ?>;
 	var routers_array = <?php echo json_encode(next($routers)); ?>;
+	var router_event_listener= "";
 
 	var routers = {"main_router": main_routers_array, "router": routers_array};
 	setNavigationPage("home", "../main_page.php");

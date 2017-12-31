@@ -10,11 +10,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 </head>
 <body>
+	<?php
+			include("resources.php");
+			include("navigation_bar.php");
+	?>
+
 	<div class="container">
 
 		<?php
-			include("resources.php"); 
-			include("navigation_bar.php");
 			include("connection.php");
 		?>
 
@@ -50,7 +53,8 @@
 			       		data.request = change_str + us + all_str + us + request_str;	       		
 			       		data.change_value = change_value;
 			       		data.router_array = router_array_stringified;
-			        }
+
+ 			        }
 			        else{
 
 				        router_ip = router_array[router_value];
@@ -67,11 +71,27 @@
 				    type: "POST",
 				    async: true,
 				    data: data,
-				    	    success: function (response) { 		
+				    	    success: function (response) {
+
+				    	    	// updateRouterTableInfo(response);	
 				    	    	alert("the success of the change is " + response);	    	    	
 				    }
-				});	  			        
+				});
+			}
 
+			function updateRouterTableInfo(router_info){
+				var i =0;
+
+				var td_results = $("#table_" + router_id).find("td");
+
+		        var router_info_arr = Object.keys(single_connect).map(function(k) { return single_connect[k] });
+		        var i=0;
+
+		        td_arr_length = td_results.length;
+				for (var i = 0; i < td_arr_length; i++) {
+				    $(td_results[i]).html(router_info_arr[i]); 
+				    //Do something
+				}
 			}
 
 		    function changeChannel(){
@@ -101,19 +121,7 @@
 		        var txpwr_value = $('#input_txpwr').val();
 
 		        createRequestData(request_change, txpwr_value);
-		    }        
-
-			function changeInformation(){
-				$.ajax({
-					url: "router_request.php",
-				    type: "POST",
-				    async: true,
-				    data: {request: 'changeTXPower', txpwr_value: txpwr_value, router_ip: router_ip, router_id: router_id},
-				    	    success: function (response) { 		
-				    	    	alert("the success of the change is " + response);	    	    	
-				    }
-				});	 
-			}
+		    }
 
 	        function getValueFromKey(item, index) {
 				if(item == this ){
@@ -167,8 +175,19 @@
 	        var router_array = <?php echo json_encode($router_array); ?>;
 	        var connections = <?php echo json_encode($connections); ?>;
 
-	        var routers = {"main_router": main_routers_array, "router": routers_array};
+	        var key = 64;
+	        var single_connect = connections[key];
 
+	        var connections_arr = Object.keys(single_connect).map(function(k) { return single_connect[k] });
+
+	        // alert(JSON.stringify(connections_arr));
+	        // var routers = {"main_router": main_routers_array, "router": routers_array};
+
+			// for (var k in target){
+			//     if (target.hasOwnProperty(k)) {
+			//          alert("Key is " + k + ", value is" + target[k]);
+			//     }
+			// }
 		
 	</script>	
 </body>

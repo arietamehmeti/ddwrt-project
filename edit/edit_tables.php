@@ -1,4 +1,16 @@
 <?php
+	
+	function parseTableName($table_name){
+
+		$split_str = explode(" ", $table_name);
+		$parsed_name="";
+
+		foreach($split_str as $noun){
+			$parsed_name .= ucfirst($noun) . " ";
+		}
+
+		return $parsed_name;
+	}
 
 	function createTable($info_arr, $result_arr){
 
@@ -7,7 +19,8 @@
 
 		$table_name = current($info_arr)->table;
 
-        echo "<table class='table' id='table_$table_name' >";
+        echo "<table class='table'>";
+         echo "<caption>".parseTableName($table_name) ."</caption>";
 
         echo "<tr>";
 
@@ -19,7 +32,7 @@
 
             foreach($info_arr as $value){
             	 echo "<th>".$value->name ."</th>";
-            }        
+            }
 
             echo "<th></th>";
             echo "</tr>";
@@ -38,24 +51,22 @@
 
 		                    $i=0;
 
-		            foreach($value as &$row){
-		                echo "<td>";
+		            foreach($value as $key=>&$row){
+		                echo "<td class=$key>";
 		                    echo "$row";
 		                echo "</td>";
 		            }
 
-		            echo "<td><button type='button' id=\"edit_".$value['id']."\" onclick=\"edit_".$table_name  ."(this)\" data-ip=\"".$value['ip']."\" data-id=\"".$value['id']."\" data-toggle=\"modal\" data-target=\"#modal_router\" class='btn btn-default'>Edit</button></td>";    
+		            echo "<td><button type='button' id=\"edit_".$value['id']."\" onclick=\"setModal(this)\" data-ip=\"".$value['ip']."\" data-id=\"".$value['id']."\" data-toggle=\"modal\" data-request=\"update\" data-table='$table_name' data-target=\"#modal_router\" class='btn btn-default'>Edit</button></td>";  
 
 		            echo "</tr>";
-
-		            echo "edit_" .$table_name;
 		        }            	
 
             }
 
         echo "</table>";
 
-        echo "<button data-toggle='modal' type='button' \" onclick=\"add_".$table_name  ."()\" data-target='#modal_router' class='btn btn-warning'>Add</button>";
+        echo "<button data-toggle='modal' type='button' onclick=\"setModal(this)\" data-target='#modal_router' data-request=\"insert\" data-table=\"$table_name\" class='btn btn-warning'>Add</button>";
 
   		echo "<button type='button' onclick=\"deleteButton('$table_name')\"class='btn btn-danger'>Delete</button>";	
 	}

@@ -1,4 +1,62 @@
 <script type="text/javascript">
+	var current_router = "form_change";
+
+	function setModal(element){
+
+		var us= "_";
+
+		var request_type = $(element).data('request');
+		var table_name = $(element).data('table');		
+
+		var request_name = request_type + us + table_name;
+
+		switch(request_name){
+			case "update_main_router":
+				var router_info = getRouterById($(element).data('id'));
+				$("#ip_router").val($(element).data('ip'));
+				addInUseToModal(router_info.in_use);
+				break;
+			case "insert_main_router":
+				addInUseToModal();	
+				break;
+			case "insert_router":
+				addOptionsToModal();
+				break;							
+			case "update_router":
+				var router_info = getRouterById($(element).data('id'));	
+				$("#ip_router").val($(element).data('ip'));
+				addOptionsToModal(router_info.main_router_id);				
+				break;
+		}
+
+		$("#form_change").on("submit",function(){
+			window[request_name](table_name);
+		});
+
+		$("#form_change").attr("name", $(element).data('id'));
+
+		setFormId(table_name);
+
+		request_type = request_type.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+		    return letter.toUpperCase();
+		});
+
+		$("#change_btn").html(request_type);
+	}		
+
+	function setCurrentEventListener(listener_funct){
+		current_router = listener_funct ;
+	}
+
+	function getCurrentEventName(){
+		return current_router;
+	}	
+
+	function setFormId(form_id){
+		$("#change_router").attr("id", form_id);
+		current_id = form_id;
+		current_router = form_id;
+	}
 
 	function addOptionsToModal(main_router_id){
 
@@ -91,6 +149,9 @@
 	}
 
 	function resetModalData(){
+
+		alert("modal reset");
+
 		if("#form_option_router".length !== 0)
 			$("#form_option_router").remove();
 
@@ -98,13 +159,16 @@
 			$("#form_in_use_router").remove();	
 
 		$("#ip_router").val("");
+	  	
+	  	$("#" + current_router).off( "submit", current_router);
 
-	  	$("#change_form").off( "submit");
-	  	// $("#change_form").prop( "onsubmit", null );
-	  	// $("#change_form").removeAttr( "onsubmit");
+	  	$("#" + current_router).prop('id', "form_change");
 
-		  	$("#change_form").prop( "submit", null );
-	  	$("#change_form").removeAttr( "submit");
+	  	$("#form_change").off( "submit");
+
+		$("#form_change").prop( "submit", null);
+	  	$("#form_change").removeAttr( "submit");
+
 	}
 
 </script>

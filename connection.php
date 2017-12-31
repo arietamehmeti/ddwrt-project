@@ -41,15 +41,13 @@ function changeChannelTable(){
 
         global $channels;
         global $router_array;
-
-        
+    
         echo "<table class='table'>";
+            echo "<caption>Channel Change</caption>";            
             echo "<tr>";
                 echo "<th>Router</th>";
                 echo "<th>Channel/Frequency</th>";          
             echo "</tr>";
-
-        // Cycle through the array
 
             echo "<tr>";
 
@@ -68,7 +66,6 @@ function changeChannelTable(){
 
             echo "</tr>";
 
-        // Close the table
         echo "</table>";
 
         echo "<button onclick='changeChannel()' class='btn'>Submit Changes</button>";
@@ -84,6 +81,7 @@ function createSSIDTable(){
 
         
         echo "<table class='table'>";
+        echo "<caption>SSID Change</caption>";
             echo "<tr>";
                 echo "<th>Router</th>";
                 echo "<th>SSID</th>";        
@@ -99,7 +97,6 @@ function createSSIDTable(){
 
             echo "</tr>";
 
-        // Close the table
         echo "</table>";
 
         echo "<button onclick='changeSSID()' class='btn'>Submit Changes</button>";
@@ -127,12 +124,32 @@ function createRouterOptions($idName){
         echo "</select > </td>";
 
 }
+
+function getOptionsFor($array){
+
+    $result = "";
+        $result .= "<td> <select>";
+
+            $i = 0;
+            
+            foreach($array as $value){   
+                    $result .= "<option value= '".$i ."'> ".($i+1) ." - " .$value ."</option>";
+                    $i++;
+            }
+
+        $result .= "</select > </td>";
+
+        return $result; 
+
+}
 function createTXPWRTable(){
 
         global $channels;
         global $router_array;
 
         echo "<table class='table'>";
+
+        echo "<caption>TXPWR Change</caption>";
             echo "<tr>";
                 echo "<th>Router</th>";
                 echo "<th>TX Power</th>";        
@@ -155,7 +172,6 @@ function createTXPWRTable(){
         echo "<br> <br>";
 }
 
-
 function createSelectOptions($array){
     echo "<td> <select>";
 
@@ -167,39 +183,50 @@ function createSelectOptions($array){
         
 }
 
-
 function showRouterInformation($connection){
 
-    // $ssh = connectToRouter($host_num);
     global $channels;
-
-    // Gets the survey_results and formats it to JSON
 
     $id = $connection->getID();
 
     $router_data = $connection->getBasicInformation();
 
-        // Open the table
-        echo "<table class='table' id='$id'>";
+        echo "<table class='table' id='table_$id'>";
+
+            echo "<caption>Router" . $connection->getSSID() ."</caption>";
+
             echo "<tr>";
 
-            foreach($router_data as $key=>$value)
-                echo "<th>$key</th>";       
+                foreach($router_data as $key=>$value){                                
+                        echo "<th>$key</th>";
+                }
+
+            echo "<th>Connected Users</th>";
 
             echo "</tr>";
 
-            // Cycle through the array
             echo "<tr>";
             
+                foreach ($router_data as $router_info) {        
+                        echo "<td>$router_info</td>";         
+                }
 
-                foreach ($router_data as $router_info) {
-                    // Output a row
-          
-                    echo "<td>$router_info</td>";         
-                }   
+                $connected_users_arr = $connection->getConnectedUsers();           
+
+                // preg_match_all("/([0-9]{1,3}\.){3}[0-9]{1,3}/",$connected_users, $out);
+
+                // $out = $out[0];
+
+                // if(is_array($out) && sizeof($out) !== 0){
+
+                //     $connected_users = getOptionsFor($out);
+                //     echo $connected_users;
+                // }
+
+                echo getOptionsFor($connected_users_arr);
 
             echo "</tr>";
-        // Close the table
+
         echo "</table>";
     
 }
@@ -270,6 +297,9 @@ function showSiteSurvey($connection){
 
 
     echo "<table class='table'>";
+
+    echo "<caption>Site Survey</caption>";
+
     echo "<tr>";
         echo "<th>SSID</td>";
         echo "<th>Channel</td>";
@@ -327,26 +357,30 @@ $channels = array(
 
 $main_ip = "";
 $router_array = [];
+$connections = array();
 
 if(isset($_SESSION['main_ip_id']) && !empty($_SESSION['main_ip_id'])) {
 
     $main_ip = $_SESSION['main_ip'];
 
-    $router_row = getRouters($_SESSION['main_ip_id']);
+    $main_ip_id = $_SESSION["main_ip_id"];
+}else{
+
+    $res = mysqli_query($conn, "SELECT id,ip from main_router WHERE in_use = true");
+
+    if($row = mysqli_fetch_row($res)){
+        $main_ip = $row['ip'];
+        $main_ip_id = $row['id'];
+    }else{
+            echo  mysqli_error($conn);
+    }
+
+}
+    $router_row = getRouters($main_ip_id);
 
     while ($row = mysqli_fetch_assoc($router_row)) {
-
         $router_array[$row['id']] = $row['ip'];
     }
-}
-
-if(isset($_SESSION['main_ip_id']) &&  !empty($_SESSION['main_ip_id'])) {
-
-    $main_ip_id = $_SESSION["main_ip_id"];
-}
-
-
-$connections = array();
 
 changeChannelTable();
 createSSIDTable();
@@ -354,17 +388,24 @@ createTXPWRTable();
 
 $router_array_length =count($router_array); 
 
-foreach ($router_array as $key=>$router_ip) {
 
-    $connection = new Router($key,$router_ip);
-    $connection->connectToRouter();
-    // echo " the ip is " .$router_ip;
+if($router_array_length != 0){
 
-    if($connection !== false){
-        $connections[$key]= $connection;
-        showRouterInformation($connection);
-    }
+     foreach ($router_array as $key=>$router_ip) {
+
+        $connection = new Router($key,$router_ip);
+        
+        $connection->connectToRouter();
+
+        if($connection !== false){
+            $connections[$key]= $connection;
+            showRouterInformation($connection);
+        }        
+    }   
+}else{
+    echo "<h4>There are no routers connected, or registered. </h4>";
 }
+
 
 // showSiteSurvey($connections[12]);
 

@@ -93,6 +93,8 @@ if(isset($_POST['request']) && $_POST['request'] =="change_ssid"){
 		
 		changeSSID($ssid_value, $host_ip, $host_id);
 
+
+
 	}
 
 if(isset($_POST['request']) && $_POST['request'] =="change_all_ssid"){
@@ -110,5 +112,23 @@ if(isset($_POST['request']) && $_POST['request'] =="change_all_ssid"){
 		}
 	}	
 
+function establishConnection(){
 
+		// Create and start timer firing after 2 seconds
+	$w1 = new EvTimer(3, 5, function () {
+		
+	});
+
+	// Create and launch timer firing after 2 seconds repeating each second
+	// until we manually stop it
+	$w2 = new EvTimer(2, 1, function ($w) {
+	    echo "is called every second, is launched after 2 seconds\n";
+	    echo "iteration = ", Ev::iteration(), PHP_EOL;
+
+	    // Stop the watcher after 5 iterations
+	    Ev::iteration() == 5 and $w->stop();
+	    // Stop the watcher if further calls cause more than 10 iterations
+	    Ev::iteration() >= 10 and $w->stop();
+	});
+}
 ?>

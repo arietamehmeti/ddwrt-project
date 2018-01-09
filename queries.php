@@ -27,7 +27,7 @@ function deactivateActiveRouter(){
 function insertMainRouter($main_ip, $in_use){
 	global $conn;
 
-	$sql = "INSERT INTO main_router (ip, in_use) VALUES ('$main_ip', true)";
+	$sql = "INSERT INTO main_router (ip, in_use) VALUES ('$main_ip', $in_use)";
 
 	$query = mysqli_query($conn, $sql);
 
@@ -117,6 +117,24 @@ function updateRouter($id, $ip, $main_router_id){
 
 }
 
+function getRouters($main_router_id){
+    global $conn;
+
+    // echo "them main router is" .$main_router_id;
+
+    $sql = "SELECT id,ip FROM router WHERE main_router_id = '$main_router_id'";
+
+    $query = mysqli_query($conn, $sql);
+
+    if($query)
+        {
+            return $query;
+        }
+    else
+        echo "Error" .mysqli_error($conn);
+
+}
+
 function getAllRouters(){
 
 		global $conn;
@@ -144,7 +162,7 @@ function getAllRouters(){
 		}
 	}
 
-function getMainRouter(){
+function getMainRouters(){
 
 		global $conn;
 		$table_str = "table";
@@ -169,6 +187,26 @@ function getMainRouter(){
 			echo  mysqli_error($conn);
 		}
 	}
+
+function getMainActiveRouter(){
+
+		global $conn;
+		$table_str = "table";
+		$results_str = "routers";
+
+		$array_results = [];
+
+		$query = "SELECT id,ip from main_router WHERE in_use=true";
+
+		if($res =  mysqli_query($conn, $query)){			
+			return $res;
+		}
+		else{
+
+			return  mysqli_error($conn);
+		}
+	}
+
 
 if(isset($_POST['request']) && $_POST['request'] =="submitRouterInfo"){
 	

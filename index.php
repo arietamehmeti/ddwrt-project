@@ -8,7 +8,7 @@
 	    <!-- Required meta tags -->
 	    <meta charset="utf-8">
 	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+	    <link rel="stylesheet" href="css/index.css">
 	    <!-- Bootstrap CSS -->
 	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 
@@ -17,67 +17,25 @@
 	<body>
 
     <div class="container">
+    	<?php include("resources.php") ?>
 
-      <form class="form-signin" onsubmit="submitRouterInfo()">
-        <h2 class="form-signin-heading text-center heading">Router Registration</h2>
+      <form class="form-signin" id="router_form">
+        <h2 class="form-signin-heading text-center heading my-5">Router Registration</h2>
         <label for="main_ip" class="sr-only">Main Router IP</label>
-        <input type="text"  placeholder="Main Router IP" pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" class="form-control" id="main_ip" max="15" name="main_router" min="1" required>     
+        <input type="text"  placeholder="Main Router IP" pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" class="form-control mb-4" id="main_ip" max="15" required>    
          	
-     	<div id="ip_addresses">				          	
+     	<div id="ip_addresses">			          	
 
-      	</div>      
-
-  		<div class="singin-buttons text-center">
-        	<button class="btn btn-secondary " onclick="addIPField()">Add another IP</button>   
-        	<input class="btn btn-primary" type="submit" name="submit" value="Register Routers">  		
-
-  		</div>
-     
+      	</div>
+      	<!-- <button type="button" id="remove_button" class="btn btn-outline-danger">X</button>     -->
       </form>
 
+  		<div class="singin-buttons text-center">
+        	<button class="btn btn-secondary mr-1" onclick="addIPField()">Add another IP</button>   
+        	<input class="btn btn-primary ml-1" type="submit" form="router_form" name="submit" value="Register Routers">  		
+  		</div>  	
     </div>
 
-    <style type="text/css">
-    	
-body {
-		  padding-top: 40px;
-		  padding-bottom: 40px;
-		  background-color: #eee;
-		}
-
-.text-center {
-  text-align: center;
-}
-
-		.form-signin {
-		  max-width: 330px;
-		  padding: 15px;
-		  margin: 0 auto;
-		}
-
-		.form-signin .form-signin-heading {
-		  margin-bottom: 20px;
-		}
-
-		.form-signin .form-control {
-		  position: relative;
-		  margin-bottom: 10px;
-		  margin-top: 10px;
-		  box-sizing: border-box;
-		  height: auto;
-		  padding: 10px;
-		  font-size: 16px;
-		}
-		.form-signin .form-control:focus {
-		  z-index: 2;
-		}
-		.form-signin input[type="text"] {
-		  margin-bottom: 10px;
-		  margin-top: 10px;
-		  border-bottom-right-radius: 0;
-		  border-bottom-left-radius: 0;
-		}  	
-    </style>
 	<?php
 
 	require('mysql.php');
@@ -124,14 +82,30 @@ body {
 
 		<script>
 
+			function addIPField(){
+
+				var ip_input_em = $("#main_ip").clone();
+				var remove_button = $("#remove_button").clone();
+
+				$(remove_button).removeProp("id");
+
+				$(ip_input_em).val("");
+				$(ip_input_em).attr("class","form-control router_ip");
+				$(ip_input_em).attr("placeholder", "Router IP");
+
+				var ip_address_div = $("#ip_addresses");
+
+				$(ip_address_div).append(ip_input_em);
+			}
+
 			 function submitRouterInfo(){	
 
-				var main_ip = document.getElementById("main_ip").value;
+				var main_ip = $("#main_ip").val();
 				var router_ips =[];
-				
-				$(".ip_address").each(function() {
-				    // alert($(this).val());
-				    router_ips.push ($(this).val());
+
+				$('.router_ip').each(function(key, obj) {
+				    router_ips.push($(this).val());
+				    alert($(this).val());
 				});
 
 				$.ajax({
@@ -147,33 +121,10 @@ body {
 
 			}	
 
-			function addIPField(){
-
-				var ip_pattern = "^([0-9]{1,3}\.){3}[0-9]{1,3}$";
-
-				var form_div = document.createElement("div");
-
-				var label_em = document.createElement("label");
-				label_em.setAttribute("class", "sr-only control-label");				
-
-				var ip_input_em = document.createElement("input");
-				ip_input_em.setAttribute("type", "text");
-				ip_input_em.setAttribute("pattern", ip_pattern);
-				ip_input_em.setAttribute("placeholder", "IP address");
-				ip_input_em.setAttribute("class", "form-control ip_address");
-				ip_input_em.setAttribute("name", "router");
-				ip_input_em.setAttribute("mas", 15);
-
-				ip_input_em.required = true;
-
-				form_div.appendChild(label_em);
-				form_div.appendChild(ip_input_em);
-
-				var ip_address_div = document.getElementById("ip_addresses");
-
-				ip_address_div.appendChild(form_div);
-				
-			}								
+			$("#router_form").on("submit", function(event){
+				event.preventDefault();
+				submitRouterInfo();
+			});
 
 		</script>
 

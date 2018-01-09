@@ -22,8 +22,8 @@
 	<div class="container">
 		<?php 
 			include("../queries.php");
-			include("../navigation_bar.php");		
-			include("edit_tables.php");			
+			include("../navigation_bar.php");	
+			include("edit_tables.php");
 		?>
 
 	</div>
@@ -103,11 +103,12 @@
 					},
 				error: function (response) {
 			    	    console.log(response);
-			    	    location.reload();	    	    
+			    	    location.reload(true);    	    
 			    }
 			    });		
 
 	}
+
 	function checkRouters(elem, table_name){
 		var id = $(elem).attr("id");
 	

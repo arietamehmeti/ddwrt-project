@@ -1,5 +1,4 @@
 <nav class="navbar navbar-default navbar-inverse bg-light navbar-static-top">
-  <div class="container">
      <ul class="nav">
       <li class="nav-item">
         <a id ="home" class="nav-link nav-brand" href="">Home</a>
@@ -8,7 +7,6 @@
         <a id="edit" class="nav-link nav-brand" href="">Edit</a>
       </li>
     </ul>     
-  </div>
 
 </nav>
 

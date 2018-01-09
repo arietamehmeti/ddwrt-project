@@ -38,7 +38,8 @@
 		$(".modal-footer").find().empty();
 	}
 
-	$('#modal_router').on('hidden.bs.modal', function (e) {
-	  	resetModalData();
+	$('#modal_router').on('hidden.bs.modal', function (e) {    
+	  	// resetModalData();
+      location.reload(true);
 	});
 </script>

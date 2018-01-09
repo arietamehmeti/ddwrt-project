@@ -48,41 +48,49 @@ class Router implements JsonSerializable
 
     public function jsonSerialize() {
         return array(
-            'wan' => $this->wan,
-            'ip'=>$this->ip,
-            'ssid'=>$this->ssid,
-            'channel_bw'=> $this->channel_bw,
-            'channel'=>$this->channel,
-            'tx_power'=>$this->tx_power,
-            'connected_users'=>$this->connected_users
-            // 'id'=>$this->id,          
+            'wan' => $this->getWANIp(),
+            'ip'=> $this->getLANIp(),
+            'ssid'=> $this->getSSID(),
+            'channel_bandwidth'=> $this->getChannelBW("ath0"),
+            'channel'=>$this->getChannel(),
+            'tx_power'=>$this->getTXPower(),
+            'connected_users'=> $this->getConnectedUsers(),
+            'id'=>$this->getID()
         );
     }
 
     function connectToRouter(){                     
 
         try{
-
             if($this->ssh_connection !== null)
-                return $this->ssh_connection;
+                return true;
 
-            $ip =  $this->ip;
-
-            $this->ssh_connection = new Net_SSH2($ip);
+            $this->ssh_connection = new Net_SSH2($this->ip);
 
             if(!$this->ssh_connection->login($this->server["user"],$this->server["password"])){
                 // exit('Login Failed');
-                return false;         
+                // echo "it got  stuck here" .$this->ssh_connection->login($this->server["user"],$this->server["password"]);
+                return false;
             }        
 
         }
         catch(Exception $e){
-            echo 'Caught exception: ',  $e->getMessage(), "\n";
+            // echo 'Caught exception: ',  $e->getMessage(), "\n";
+            return false;
         }
 
-        return  $this->ssh_connection;            
-
+        return  true;
     }
+
+    function getConnection(){
+        return $this->connection;
+    }
+
+
+    function setConnection($onnection){
+        return $this->connection = $connection;
+    }
+
 
     function getRouterConnection(){
         return  $this->ssh_connection;
@@ -90,8 +98,6 @@ class Router implements JsonSerializable
 
     function setChannel($channelValue){
         $this->ssh_connection->exec("nvram set ath0_channel=".$channelValue);
-        $this->ssh_connection->exec("nvram commit");
-        $this->ssh_connection->exec("reboot");
     }
 
     function getWANIp(){
@@ -110,8 +116,6 @@ class Router implements JsonSerializable
     function setTXPower($power){
         // The command below shows the difference in the tx power in the router ip address
         $this->ssh_connection->exec("nvram set ath0_txpwrdbm=".$power);
-        $this->ssh_connection->exec("nvram commit");
-        $this->ssh_connection->exec("reboot");
     }
 
     function getLANIp(){
@@ -123,7 +127,9 @@ class Router implements JsonSerializable
         if($this->channel_bw != -1)
             return $this->channel_bw;
 
-        return $this->ssh_connection->exec('nvram get ' .$channel_name .'_channelbw');
+        $this->channel_bw = $this->ssh_connection->exec('nvram get ' .$channel_name .'_channelbw');
+        
+        return  $this->channel_bw ;
     }    
 
     function getTXPower(){
@@ -158,8 +164,6 @@ class Router implements JsonSerializable
     function setSSID($newSSID){
 
         $this->ssh_connection->exec('nvram set ath0_ssid=' .$newSSID);
-        $this->ssh_connection->exec("nvram commit");
-        $this->ssh_connection->exec("reboot");
 
         $this->ssid = $newSSID;
     }
@@ -175,23 +179,71 @@ class Router implements JsonSerializable
         return  $this->channel;
     }
 
-    function commit(){
-        $this->ssh_connection->exec("nvram commit");
-    }
-
-    function reboot(){
-         $this->ssh_connection->exec("reboot");
-    }
-
     function getIP(){
         return $this->ip;
     } 
 
-    function getSurveyResult(){
+    function reboot(){
+        $this->ssh_connection->exec("reboot");
+    }
+
+    function commit(){
+        $this->ssh_connection->exec("nvram commit");
+    }
+
+    function getSiteSurvey(){
 
         $survey_result = $this->ssh_connection->exec('site_survey');
 
-        return $survey_result;
+        // echo "The resultts is " .$survey_result;
+
+        $results_parsed = preg_replace("#\[ [0-9]+\]# ", "} {", $survey_result);
+
+        $results_parsed .= "}";
+
+        $results_parsed = substr($results_parsed, 1, strlen($results_parsed));
+
+        $initialPos = 0;
+
+        $results_array = [];
+        $temp;
+
+        while( strlen($results_parsed) > 0 ){
+
+            $temp = substr($results_parsed, $initialPos, $position = strpos($results_parsed,"}") + 1);
+            // echo $temp ."<br>" .strlen($results_parsed) . "<br>";
+
+            $results_parsed = substr($results_parsed, $position, strlen($results_parsed));
+
+            // echo "the results remaining are " .$results_parsed ."<br><br>";
+
+            $temp = preg_replace("#\[#", ":\"", $temp); 
+            $temp =preg_replace("#\]#", "\",", $temp);  
+
+            $temp =preg_replace("#\bSSID#","\"SSID\"", $temp);
+            $temp =preg_replace("#BSSID#","\"BSSID\"", $temp);
+            $temp =preg_replace("#channel#","\"channel\"", $temp);
+            $temp =preg_replace("#frequency#","\"frequency\"", $temp);
+            $temp =preg_replace("#rssi#","\"rssi\"", $temp);
+            $temp =preg_replace("#noise#","\"noise\"", $temp);
+            $temp =preg_replace("#beacon#","\"beacon\"", $temp);
+            $temp =preg_replace("#cap#","\"cap\"", $temp);
+            $temp =preg_replace("#dtim#","\"dtim\"", $temp);
+            $temp =preg_replace("#rate#","\"rate\"", $temp);
+            $temp =preg_replace("#enc:#","\"enc\":", $temp);
+
+            // Unfortunately, the , } code in the end is not replaced by the regular expression, so I just cut it out of the variable, and add an "}" in the end.
+            $temp = substr($temp, 0, strlen($temp) - 3);
+
+            $temp.= "}";
+
+            $temp = json_decode($temp);    
+
+            array_push($results_array, $temp );         
+        }
+
+    return $results_array;   
+
     }
 
     function getBasicInformation(){

@@ -150,8 +150,6 @@
 
 	function resetModalData(){
 
-		alert("modal reset");
-
 		if("#form_option_router".length !== 0)
 			$("#form_option_router").remove();
 

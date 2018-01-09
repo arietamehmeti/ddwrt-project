@@ -19,8 +19,8 @@
 
 		$table_name = current($info_arr)->table;
 
-        echo "<table class='table'>";
-         echo "<caption>".parseTableName($table_name) ."</caption>";
+        echo "<table class='table mt-5 table-bordered'>";
+         echo "<caption class='mb-0 pb-0'>".parseTableName($table_name) ."</caption>";
 
         echo "<tr>";
 
@@ -66,12 +66,12 @@
 
         echo "</table>";
 
-        echo "<button data-toggle='modal' type='button' onclick=\"setModal(this)\" data-target='#modal_router' data-request=\"insert\" data-table=\"$table_name\" class='btn btn-warning'>Add</button>";
+        echo "<button data-toggle='modal' type='button' onclick=\"setModal(this)\" data-target='#modal_router' data-request=\"insert\" data-table=\"$table_name\" class='btn btn-warning mt-0 mr-2'>Add</button>";
 
-  		echo "<button type='button' onclick=\"deleteButton('$table_name')\"class='btn btn-danger'>Delete</button>";	
+  		echo "<button type='button' onclick=\"deleteButton('$table_name')\"class='btn btn-danger mt-0'>Delete</button>";	
 	}
 
-	$main_routers = getMainRouter();
+	$main_routers = getMainRouters();
 	$routers = getAllRouters();
 
 	createTable(current($main_routers), next($main_routers));

@@ -48,7 +48,7 @@
 						</select></td>
 					</tr>
 				</table>	
-				<input type="submit" class="btn mb-3 mt-0" name="Commit Changes">			
+				<input type="submit" id="submit" class="btn mb-3 mt-0" name="Commit Changes">			
 			</form>
 
 			<table class="table my-5 table-striped" id="site_survey">
@@ -211,8 +211,10 @@
 			}
 
 			function addSelectedRouter(router){
+
 				if($("#router_select option[value='"+ router.id +"']").length == 1){
-					$('#router_select').removeProp('disabled');
+					$('#router_select').removeAttr('disabled');
+					$('#submit').removeAttr('disabled');
 				}else{
 
 					var select_router = $("#router_select");
@@ -499,6 +501,8 @@
 			function removeSelectedRouter(router_id){
 				if(router_id == -1){
 					$('#router_select').prop('disabled', 'disabled');
+					$('#router_select').prop('disabled', 'disabled');
+					$('#submit').prop('disabled', 'disabled');
 				}else{
 					$("#router_select option[value='"+ router_id +"']").remove();
 				}								

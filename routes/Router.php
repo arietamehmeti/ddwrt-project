@@ -44,15 +44,29 @@ class Router implements JsonSerializable
         $this->ssid =  $this->ssh_connection->exec('nvram get ath0_ssid');
 
         return $this->ssid;
-    }    
+    }
+
+    function getChannelValue(){
+        $channel = $this->getChannel();
+        $channels = $this->channels;
+
+        for($i = 0; $i< sizeof($channels); $i++){
+
+            if($channels[$i] == $channel){
+                return $i+1;
+            }
+        }
+    }
 
     public function jsonSerialize() {
+
         return array(
             'wan' => $this->getWANIp(),
             'ip'=> $this->getLANIp(),
             'ssid'=> $this->getSSID(),
             'channel_bandwidth'=> $this->getChannelBW("ath0"),
-            'channel'=>$this->getChannel(),
+            'channel'=> $this->getChannel(),
+            'channel_value' => $this->getChannelValue(),
             'tx_power'=>$this->getTXPower(),
             'connected_users'=> $this->getConnectedUsers(),
             'id'=>$this->getID()

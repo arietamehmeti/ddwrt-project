@@ -6,9 +6,13 @@
 	$all="all";
 	$us="_";
 
-function change_channel($connection, $channelValue){
+function change_channel($connection, $channel){
 
-		$connection->setChannel($channelValue);
+		$connection->setChannel($channel);
+}
+
+function change_channel_value($connection, $channelValue){
+	return $channelValue;
 }
 
 function change_ssid($connection, $ssid_value){
@@ -68,7 +72,6 @@ if(isset($_POST['request']) && $_POST['request'] =="change"){
 
 		$connection = connectToRouter($router_ip, $router_id);
 
-		// var_dump($json_changes);
 		foreach($json_changes as $key=>$value){
 
 			$functionName= $change .$us .$key;
@@ -138,7 +141,7 @@ if(isset($_POST['request']) && $_POST['request'] =="get_router_info"){
 
 if(isset($_POST['request']) && $_POST['request'] =="get_site_survey"){
 
-		$router_ip = "192.168.1.4";
+		$router_ip = $_POST["router_ip"];
 		$router_id = $_POST["router_id"];
 
 		$connection = new Router($router_id, $router_ip);
@@ -148,6 +151,23 @@ if(isset($_POST['request']) && $_POST['request'] =="get_site_survey"){
 		if($connection_established == 1){
 			$site_survey = $connection->getSiteSurvey();
 			echo json_encode($site_survey);
+		}
+}
+
+if(isset($_POST['request']) && $_POST['request'] =="connect_to_router"){
+
+		$router = $_POST["router"];
+		$router_json =$router;
+
+		$router_ip =  $router_json['ip'];
+		$router_id =  $router_json['id'];
+
+		$connection = new Router($router_id, $router_ip);
+
+		$connection_established = $connection->connectToRouter();
+
+		if($connection_established == 1){
+			echo true;
 		}
 }
 ?>

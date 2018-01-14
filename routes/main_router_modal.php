@@ -21,9 +21,9 @@
 				break;
 			case "insert_router":
 				addOptionsToModal();
-				break;							
+				break;					
 			case "update_router":
-				var router_info = getRouterById($(element).data('id'));	
+				var router_info = getRouterById($(element).data('id'));
 				$("#ip_router").val($(element).data('ip'));
 				addOptionsToModal(router_info.main_router_id);				
 				break;
@@ -79,14 +79,13 @@
 		main_routers_array.forEach(function(router) {    		
 			var option = document.createElement("option");
 
-				$(option).val(router.id);
+			$(option).val(router.id);
 
 			$(option).text(router.id + " - " +router.ip);		
 
 			$(select).append(option);
+			if(main_router_id == router.id){	
 
-			
-			if(main_router_id == router.id){				
 				$(select).val(router.id).change();
 			}
 		});
@@ -147,6 +146,23 @@
 		$(".modal-body").append(form_group);	
 
 	}
+
+	function getRouterById(router_id){
+
+		var result = "";
+
+		for(var key in main_routers_array){
+			if(main_routers_array[key].id == router_id)
+				return main_routers_array[key];
+		}
+
+		for(var key in routers_array){
+			if(routers_array[key].id == router_id)
+				return routers_array[key];
+		}
+
+		return false;
+	}	
 
 	function resetModalData(){
 

@@ -1,23 +1,43 @@
 <!DOCTYPE html>
 
 <html>
-
 	<head>
-		<title> Welcome to RouteVille</title>
+		<title>DDWRT Router Management</title>
 
-	    <!-- Required meta tags -->
-	    <meta charset="utf-8">
-	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	    <link rel="stylesheet" href="css/index.css">
-	    <!-- Bootstrap CSS -->
-	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+		<?php
+
+			if (session_status() == PHP_SESSION_NONE) {
+		    session_start();
+			}
+
+			$base_path = __DIR__;
+
+			$url = $_SERVER['REQUEST_URI']; //returns the current URL
+			$parts = explode('/',$url);
+			$base_path_url = $_SERVER['SERVER_NAME'];
+			for ($i = 0; $i < count($parts) - 1; $i++) {
+			 $base_path_url .= $parts[$i] . "/";
+			}
+
+			$base_path_url = "http://".$base_path_url;
+			$_SESSION["base_path"] = $base_path;
+			$_SESSION["base_path_url"] = $base_path_url;
+
+			require "includes/header_resources.php";	
+		 ?>
+
+    	<link rel="stylesheet" href="css/index.css">
 
 	</head>
 
 	<body>
 
     <div class="container">
-    	<?php include("resources.php") ?>
+
+	<?php  
+		require("includes/bootstrap_resources.php");
+		require "includes/navigation_bar.php";
+	?>
 
       <form class="form-signin" id="router_form">
         <h2 class="form-signin-heading text-center heading my-5">Router Registration</h2>
@@ -38,14 +58,8 @@
 
 	<?php
 
-	require('mysql.php');
+	require("db/mysql.php");
 
-	if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-	}
-
-	// define variables and set to empty values
-	  // require('header.php');
 	$result = true;
 	unset($_SESSION['main_ip']);
 	unset($_SESSION['main_ip_id']);
@@ -63,8 +77,7 @@
 				$_SESSION['main_ip'] = $row['ip'];
 				$_SESSION['main_ip_id'] = $row['id'];
 
-				header("Location: main_page.php");
-				
+				header("Location: ".$base_path_url."routes/main_page.php");				
 			}
 
 		}
@@ -75,7 +88,7 @@
 
 	}
 	else{
-		header("Location: main_page.php");
+		header("Location: ".$base_path_url."routes/main_page.php");
 	}
 
 	?>
@@ -105,18 +118,19 @@
 
 				$('.router_ip').each(function(key, obj) {
 				    router_ips.push($(this).val());
-				    alert($(this).val());
 				});
 
 				$.ajax({
-					url: "queries.php",
+					url: "db/queries.php",
 				    type: "POST",
 				    async: true,
 				    data: {request: 'submitRouterInfo', main_ip: main_ip, router_ips: router_ips},
 				    	    success: function (response) { 		
-				    	    	alert(response);
-				    	    	window.location.href = "main_page.php";
-				    }
+				    	    	window.location.href = base_path_url "routes/main_page.php";
+				    },
+				    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+				       alert("Request failed, please try again");
+				    } 					    
 				});
 
 			}	
@@ -126,11 +140,8 @@
 				submitRouterInfo();
 			});
 
+			var base_path_url = <?php echo json_encode($base_path_url); ?>;
 		</script>
-
-		<?php
-		 include("resources.php");
-		?>	
 
 	</body>
 </html>

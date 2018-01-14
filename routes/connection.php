@@ -1,13 +1,12 @@
 <?php 
 
-include 'Router.php';
-include 'mysql.php';
-include "queries.php";
+include $base_path.'/routes/Router.php';
+include $base_path.'/db/mysql.php';
+include $base_path.'/db/queries.php';
 
 /* Once given the host number of the router, returns the site_surve with all the routers available information
 * $host_num - The host number (the last IP that defines its position on the router).
 */
-
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -44,8 +43,7 @@ $main_router = "";
         if(mysqli_num_rows($result) == 0){
             header("Location: index.php");
             die();
-        }        
-            echo  mysqli_error($conn);
+        }
     }
 
     $router_row = getRouters($main_ip_id);
@@ -59,5 +57,4 @@ $main_router = "";
 
         $router_array[$row['id']] = $router_info;
     }
-
  ?>
